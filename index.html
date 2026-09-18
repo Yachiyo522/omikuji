@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>着物姿が似合う街 おみくじ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep-red: #7c1f24;
+    --deeper-red: #5a1418;
+    --gold: #cf9c3a;
+    --gold-bright: #e8c877;
+    --paper: #fbf3e2;
+    --paper-shadow: #d8c6a0;
+    --ink: #3a2418;
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family: "Noto Sans JP", sans-serif;
+    color: var(--ink);
+    overflow-x:hidden;
+  }
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,220,150,0.15), transparent 60%),
+      linear-gradient(160deg, var(--deep-red) 0%, var(--deeper-red) 55%, #3d0f12 100%);
+    background-attachment: fixed;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding: 32px 16px 64px;
+    position: relative;
+  }
+  /* subtle asanoha (hemp leaf) pattern overlay */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    opacity:0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104' viewBox='0 0 60 104'%3E%3Cg fill='none' stroke='%23f4d78a' stroke-width='1'%3E%3Cpath d='M30 0 L60 17.3 L60 52 L30 69.3 L0 52 L0 17.3 Z'/%3E%3Cpath d='M30 0 L30 34.6'/%3E%3Cpath d='M0 17.3 L30 34.6 L60 17.3'/%3E%3Cpath d='M0 52 L30 34.6 L60 52'/%3E%3Cpath d='M30 34.6 L30 69.3'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 120px 208px;
+  }
+  .petals{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .petal{
+    position:absolute; top:-20px;
+    font-size: 16px;
+    opacity:0.7;
+    animation: fall linear infinite;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+  }
+  @keyframes fall{
+    0%{ transform: translateY(-10vh) translateX(0) rotate(0deg); }
+    100%{ transform: translateY(110vh) translateX(var(--drift,30px)) rotate(360deg); }
+  }
+
+  .wrap{
+    position:relative; z-index:1;
+    width:100%; max-width: 560px;
+    display:flex; flex-direction:column; align-items:center;
+  }
+
+  header{ text-align:center; margin: 12px 0 28px; }
+  header .kanji-badge{
+    display:inline-block;
+    font-family:"Shippori Mincho", serif;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    color: var(--gold-bright);
+    border: 1px solid rgba(232,200,119,0.5);
+    padding: 4px 14px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  h1{
+    font-family:"Shippori Mincho", serif;
+    font-weight: 800;
+    font-size: clamp(28px, 7vw, 40px);
+    color: #fff6e6;
+    margin: 0 0 8px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    letter-spacing: 0.04em;
+  }
+  header p{
+    color: #f1d9b8;
+    font-size: 14px;
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  /* --- Stage: box + button --- */
+  .stage{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 24px;
+  }
+
+  .kuji-box{
+    width: 168px; height: 168px;
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .kuji-box svg{ width:100%; height:100%; filter: drop-shadow(0 10px 18px rgba(0,0,0,0.4)); }
+  .kuji-box.shaking{ animation: shake 0.5s ease-in-out 3; }
+  @keyframes shake{
+    0%,100%{ transform: rotate(0deg) translateX(0); }
+    20%{ transform: rotate(-6deg) translateX(-4px); }
+    40%{ transform: rotate(5deg) translateX(4px); }
+    60%{ transform: rotate(-4deg) translateX(-3px); }
+    80%{ transform: rotate(3deg) translateX(2px); }
+  }
+
+  .draw-btn{
+    font-family:"Shippori Mincho", serif;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: #3a2418;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    border: none;
+    padding: 15px 40px;
+    border-radius: 999px;
+    cursor:pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.6);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .draw-btn:hover{ transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.6); }
+  .draw-btn:active{ transform: translateY(1px); }
+  .draw-btn:disabled{ opacity:0.6; cursor:default; transform:none; }
+
+  .counter{
+    font-size: 12px;
+    color: #e7c9a0;
+    letter-spacing: 0.05em;
+  }
+
+  /* --- Result slip --- */
+  .slip-area{ width:100%; display:none; flex-direction:column; align-items:center; }
+  .slip-area.show{ display:flex; }
+
+  .slip{
+    width:100%;
+    max-width: 460px;
+    background: var(--paper);
+    background-image:
+      linear-gradient(180deg, rgba(255,255,255,0.5), transparent 20%),
+      repeating-linear-gradient(0deg, rgba(150,120,70,0.04) 0px, rgba(150,120,70,0.04) 1px, transparent 1px, transparent 26px);
+    border-radius: 6px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(180,140,70,0.25);
+    padding: 30px 26px 26px;
+    position:relative;
+    transform-origin: top center;
+    animation: unfold 0.55s cubic-bezier(.2,.8,.3,1.1);
+  }
+  @keyframes unfold{
+    0%{ transform: scaleY(0.05); opacity:0; }
+    60%{ opacity:1; }
+    100%{ transform: scaleY(1); opacity:1; }
+  }
+  .slip::before{
+    content:"";
+    position:absolute; left:0; right:0; top:0;
+    height:6px;
+    background: linear-gradient(90deg, var(--deep-red), var(--gold) 50%, var(--deep-red));
+    border-radius: 6px 6px 0 0;
+  }
+
+  .rank-row{ text-align:center; margin-bottom: 6px; }
+  .rank-seal{
+    display:inline-flex;
+    align-items:center; justify-content:center;
+    width: 96px; height:96px;
+    border-radius: 50%;
+    border: 3px solid var(--deep-red);
+    color: var(--deep-red);
+    font-family:"Shippori Mincho", serif;
+    font-weight: 800;
+    font-size: 26px;
+    margin: 4px auto 10px;
+    background: #fff9ee;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15) inset;
+  }
+  .rank-label{
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    color: #8a5a2a;
+    text-transform:uppercase;
+  }
+
+  .divider{
+    border:none;
+    border-top: 1px dashed #c8ab7a;
+    margin: 16px 0;
+  }
+
+  .town-name{
+    font-family:"Shippori Mincho", serif;
+    font-size: 26px;
+    font-weight: 700;
+    text-align:center;
+    color: var(--deep-red);
+    margin: 4px 0 2px;
+  }
+  .town-region{
+    text-align:center;
+    font-size: 12px;
+    color:#8a6a3a;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .town-desc{
+    font-size: 14.5px;
+    line-height: 1.9;
+    color: #4a3320;
+    margin: 0 0 14px;
+  }
+  .town-point{
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: #6a4a20;
+    background: rgba(207,156,58,0.12);
+    border-left: 3px solid var(--gold);
+    padding: 10px 14px;
+    border-radius: 4px;
+  }
+  .town-point b{ color: var(--deep-red); }
+
+  .fortune-msg{
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: #4a3320;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed #c8ab7a;
+  }
+
+  .actions{
+    display:flex; gap: 12px; margin-top: 24px; flex-wrap:wrap; justify-content:center;
+  }
+  .btn-secondary{
+    font-family:"Noto Sans JP", sans-serif;
+    font-size: 13px;
+    color: #fff6e6;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,246,230,0.4);
+    padding: 10px 20px;
+    border-radius: 999px;
+    cursor:pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-secondary:hover{ background: rgba(255,255,255,0.18); }
+
+  footer{
+    margin-top: 40px;
+    text-align:center;
+    font-size: 11px;
+    color: rgba(255,246,230,0.5);
+    line-height:1.8;
+  }
+
+  .toast{
+    position: fixed;
+    bottom: 24px; left:50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #2c1810;
+    color: #f4e3c4;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity:0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events:none;
+    z-index: 10;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="petals" id="petals"></div>
+
+<div class="wrap">
+  <header>
+    <span class="kanji-badge">御 神 籤</span>
+    <h1>着物姿が似合う街<br>おみくじ</h1>
+    <p>今日、着物で歩きたくなる街を占います。<br>おみくじを引いて、旅の行き先を天にゆだねてみましょう。</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="kuji-box" id="kujiBox">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="100" cy="178" rx="70" ry="14" fill="#000" opacity="0.25"/>
+        <rect x="35" y="55" width="130" height="110" rx="10" fill="#8a3b2a"/>
+        <rect x="35" y="55" width="130" height="110" rx="10" fill="url(#woodgrad)"/>
+        <rect x="35" y="55" width="130" height="14" fill="#5c2418"/>
+        <rect x="35" y="151" width="130" height="14" fill="#5c2418"/>
+        <circle cx="100" cy="66" r="16" fill="#3a1810"/>
+        <circle cx="100" cy="66" r="12" fill="#1c0d08"/>
+        <text x="100" y="118" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#e9c877" font-weight="bold">籤</text>
+        <defs>
+          <linearGradient id="woodgrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#a8503a"/>
+            <stop offset="100%" stop-color="#7c3222"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <button class="draw-btn" id="drawBtn">おみくじを引く</button>
+    <div class="counter" id="counter">本日の御籤：0回目</div>
+  </div>
+
+  <div class="slip-area" id="slipArea">
+    <div class="slip" id="slip"></div>
+    <div class="actions">
+      <button class="btn-secondary" id="copyBtn">結果をコピー</button>
+      <button class="btn-secondary" id="againBtn">もう一度引く</button>
+    </div>
+  </div>
+
+  <footer>
+    このおみくじは日本各地の「着物姿が映える街並み」からの一発ネタです。<br>
+    実際の旅程・交通機関・営業状況は現地の最新情報をご確認ください。
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- Data: towns ---------------- */
+const TOWNS = [
+  { name:"京都・祇園", region:"京都府 京都市", desc:"石畳と紅殻格子の町家がどこまでも続く花街。夕暮れの茜色に染まる路地に立てば、几帳面に着付けた裾さばきが一段と艶やかに映えます。", point:"花見小路を南から北へ、格子越しに明かりが灯り始める逢魔が時に歩くのがおすすめです。" },
+  { name:"京都・嵐山", region:"京都府 京都市", desc:"竹林の小径を抜ける光の筋と、渡月橋にかかる山並みの緑。自然の色に寄り添うやわらかな柄の着物が、写真の中でひときわ引き立ちます。", point:"早朝の竹林は人が少なく、静けさの中で着物姿を存分に楽しめます。" },
+  { name:"金沢・ひがし茶屋街", region:"石川県 金沢市", desc:"木虫籠（きむすこ）と呼ばれる繊細な格子戸が並ぶ茶屋街。金箔文化の街らしく、少し華やかな帯や小物がよく似合います。", point:"石畳が雨に濡れると格子の影が滲み、しっとりとした風情が増します。" },
+  { name:"埼玉・川越（小江戸）", region:"埼玉県 川越市", desc:"蔵造りの町並みが江戸の面影を伝える「小江戸」。太い梁と黒漆喰の重厚さに、色鮮やかな着物がよく映えるコントラストの街です。", point:"時の鐘の近くから一番街を歩くと、蔵と着物姿がバランスよく写真に収まります。" },
+  { name:"岡山・倉敷美観地区", region:"岡山県 倉敷市", desc:"白壁と柳並木、そして倉敷川に架かる橋。水面に映る町家の影と着物の裾が重なり、絵画のような一枚を生み出します。", point:"川沿いの柳並木は逆光の時間帯に歩くと着物のシルエットが美しく浮かびます。" },
+  { name:"岐阜・飛騨高山", region:"岐阜県 高山市", desc:"出格子と酒蔵の杉玉が続く古い町並み。山あいの澄んだ空気の中、深い色合いの着物が街の落ち着いた木の色によく調和します。", point:"朝市の時間帯は活気があり、着物姿で歩くと地元の方にも声をかけてもらいやすい雰囲気です。" },
+  { name:"山口・萩", region:"山口県 萩市", desc:"武家屋敷の白壁と夏みかんの実る土塀が続く城下町。凛とした佇まいの街並みに、藍染めや無地に近い着物がしっくりきます。", point:"堀内地区の土塀沿いは人通りが少なく、静かに着物姿を楽しめる穴場です。" },
+  { name:"島根・津和野", region:"島根県 津和野町", desc:"「山陰の小京都」と呼ばれる殿町通り。白壁と鯉の泳ぐ掘割が続き、小さな橋を渡るたびに着物の裾がふわりと揺れます。", point:"殿町通りの掘割沿いは鯉と着物姿を一緒に写真に収められる人気の一角です。" },
+  { name:"神奈川・鎌倉", region:"神奈川県 鎌倉市", desc:"社寺と海が近い街ならではの、和と潮風が混ざる空気。小町通りの賑わいから一本入ると、竹垣越しに古都らしい静けさが広がります。", point:"鶴岡八幡宮の参道は着物姿での参拝客も多く、記念撮影にもなじみやすい場所です。" },
+  { name:"栃木・日光", region:"栃木県 日光市", desc:"杉並木と社寺の朱塗りが折り重なる荘厳な街並み。深緑の中に映える朱や金の意匠は、格式高い着物との相性が抜群です。", point:"神橋周辺は大谷川の流れとともに、朱塗りと着物の色合わせが映える定番スポットです。" },
+  { name:"福島・大内宿", region:"福島県 下郷町", desc:"茅葺き屋根の家々がまっすぐに連なる宿場町。素朴な茅葺きの質感には、絣や木綿のような温かみのある着物がよく馴染みます。", point:"高台の見晴らし台から通り全体を見下ろすと、街並みと着物姿の一体感が際立ちます。" },
+  { name:"岐阜・郡上八幡", region:"岐阜県 郡上市", desc:"清らかな水路が町のあちこちを流れる「水の町」。用水路を跨ぐたびに聞こえるせせらぎが、着物姿の静かな足取りとよく合います。", point:"職人町・鍛冶屋町の水路沿いは、着物の裾を軽くたくし上げて歩く姿が絵になります。" },
+  { name:"滋賀・近江八幡", region:"滋賀県 近江八幡市", desc:"八幡堀に舟が行き交う近江商人の町。水郷の風景と白壁土蔵が織りなす落ち着いた色調に、渋めの色無地や小紋が映えます。", point:"八幡堀めぐりの舟から見上げる着物姿は、地元でも人気の撮影アングルです。" },
+  { name:"愛知・犬山", region:"愛知県 犬山市", desc:"現存天守を望む城下町を、本町通りがまっすぐに貫きます。天守の白壁と町家の黒瓦のコントラストに、華やかな柄の着物がよく映えます。", point:"どんでん館周辺から犬山城を見上げる構図は、着物姿の記念撮影の定番です。" },
+  { name:"広島・尾道", region:"広島県 尾道市", desc:"坂道と路地、そして瀬戸内の海が織りなす港町。石段を上るたびに変わる景色に、軽やかな夏着物や浴衣がよく似合います。", point:"千光寺山からの坂道は眺望がよく、着物姿での散策写真に絶好の場所です。" },
+  { name:"兵庫・出石", region:"兵庫県 豊岡市", desc:"辰鼓楼がそびえる但馬の小京都。皿そばの店が連なる通りは白壁と格子戸が続き、上品な色合いの着物がよく馴染みます。", point:"辰鼓楼を背景にした通りの写真は、着物姿の記念撮影の王道スポットです。" },
+  { name:"千葉・佐原", region:"千葉県 香取市", desc:"小野川沿いに商家の町並みが続く「関東の小江戸」。柳と黒板塀の街並みに、藍色や渋い色合いの着物が落ち着いた雰囲気を添えます。", point:"小野川に架かる樋橋（ジャージャー橋）付近は着物姿の撮影で特に人気があります。" },
+  { name:"岐阜・白川郷", region:"岐阜県 白川村", desc:"合掌造りの家々が広がる世界遺産の集落。雪国らしい素朴な風景には、綿入れのような温かみを感じる着物姿がよく似合います。", point:"展望台から集落全体を見渡す構図に、着物姿を添えると物語性のある一枚になります。" },
+  { name:"愛知・有松", region:"愛知県 名古屋市", desc:"絞り染めで栄えた町家が続く旧東海道の宿場。町自体が染めの文化を今に伝えており、絞り柄の着物や浴衣との相性は格別です。", point:"有松絞りの反物を見た後に着物で通りを歩くと、街と装いのつながりを実感できます。" },
+  { name:"島根・松江", region:"島根県 松江市", desc:"堀川に城が浮かぶ「水の都」。松江城を囲む堀端の柳並木と石垣が、落ち着いた古典柄の着物によく合う情緒を醸し出します。", point:"堀川めぐりの舟から見る石垣沿いの着物姿は、水面越しの写真映えが抜群です。" },
+  { name:"三重・伊勢（おはらい町・おかげ横丁）", region:"三重県 伊勢市", desc:"伊勢神宮の参道に続く切妻造りの町並み。参宮の賑わいと木造建築の重厚さが、晴れやかな柄の着物をより特別なものに見せてくれます。", point:"早朝のおはらい町は人が少なく、着物姿でゆっくり参道を歩くのに最適です。" }
+];
+
+/* ---------------- Data: fortune ranks ---------------- */
+const RANKS = [
+  { label:"大吉", weight:18, tone:"今日という日は、思い切って遠出をするのに絶好の日。着物姿が旅先の景色に溶け込み、忘れられない一枚が撮れそうです。" },
+  { label:"吉",   weight:20, tone:"落ち着いた足取りで街歩きを楽しめる日。無理のない範囲でゆっくりと着物姿の時間を満喫してください。" },
+  { label:"中吉", weight:20, tone:"小さな発見がある一日。路地の奥や路面のきらめきなど、ふとした瞬間に着物姿がよく映える場面に出会えそうです。" },
+  { label:"小吉", weight:18, tone:"気負わず、普段より少しだけ足をのばしてみるとよい日。近場の街でも着物姿を楽しむ余裕が生まれます。" },
+  { label:"末吉", weight:16, tone:"焦らずじっくりが吉。下調べをしてから出かけると、着物姿がより一層映える時間帯や場所に恵まれます。" },
+  { label:"凶",   weight:8,  tone:"今日は無理をせず、着物は自宅でゆっくり眺めるのも良さそうです。次の機会にきっと良い街との出会いが待っています。" }
+];
+
+/* ---------------- State ---------------- */
+let drawCount = 0;
+let lastTownIndex = -1;
+
+/* ---------------- Helpers ---------------- */
+function weightedPick(list){
+  const total = list.reduce((s,i)=>s+i.weight, 0);
+  let r = Math.random() * total;
+  for(const item of list){
+    if(r < item.weight) return item;
+    r -= item.weight;
+  }
+  return list[list.length-1];
+}
+
+function pickTown(){
+  let idx;
+  do{
+    idx = Math.floor(Math.random() * TOWNS.length);
+  } while(TOWNS.length > 1 && idx === lastTownIndex);
+  lastTownIndex = idx;
+  return TOWNS[idx];
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(()=> t.classList.remove('show'), 1800);
+}
+
+function renderSlip(rank, town){
+  const slip = document.getElementById('slip');
+  slip.innerHTML = `
+    <div class="rank-row">
+      <div class="rank-seal">${rank.label}</div>
+      <div class="rank-label">Fortune</div>
+    </div>
+    <hr class="divider">
+    <div class="town-name">${town.name}</div>
+    <div class="town-region">${town.region}</div>
+    <p class="town-desc">${town.desc}</p>
+    <div class="town-point"><b>ワンポイント：</b>${town.point}</div>
+    <p class="fortune-msg">${rank.tone}</p>
+  `;
+}
+
+function currentResultText(){
+  const slip = document.getElementById('slip');
+  const rank = slip.querySelector('.rank-seal')?.textContent || '';
+  const town = slip.querySelector('.town-name')?.textContent || '';
+  const region = slip.querySelector('.town-region')?.textContent || '';
+  const desc = slip.querySelector('.town-desc')?.textContent || '';
+  const point = slip.querySelector('.town-point')?.textContent || '';
+  const tone = slip.querySelector('.fortune-msg')?.textContent || '';
+  return `【着物姿が似合う街 おみくじ】\n運勢：${rank}\n街：${town}（${region}）\n\n${desc}\n\n${point}\n\n${tone}`;
+}
+
+/* ---------------- Petals background ---------------- */
+function spawnPetals(){
+  const container = document.getElementById('petals');
+  const symbols = ['🌸','🍁','🍃'];
+  for(let i=0;i<16;i++){
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.setProperty('--drift', (Math.random()*80-40)+'px');
+    p.style.animationDuration = (10 + Math.random()*10) + 's';
+    p.style.animationDelay = (Math.random()*10) + 's';
+    p.style.fontSize = (12 + Math.random()*10) + 'px';
+    container.appendChild(p);
+  }
+}
+spawnPetals();
+
+/* ---------------- Main interaction ---------------- */
+const kujiBox = document.getElementById('kujiBox');
+const drawBtn = document.getElementById('drawBtn');
+const slipArea = document.getElementById('slipArea');
+const stage = document.getElementById('stage');
+const counter = document.getElementById('counter');
+const copyBtn = document.getElementById('copyBtn');
+const againBtn = document.getElementById('againBtn');
+
+drawBtn.addEventListener('click', ()=>{
+  drawBtn.disabled = true;
+  kujiBox.classList.add('shaking');
+
+  setTimeout(()=>{
+    kujiBox.classList.remove('shaking');
+    const rank = weightedPick(RANKS);
+    const town = pickTown();
+    renderSlip(rank, town);
+
+    drawCount += 1;
+    counter.textContent = `本日の御籤：${drawCount}回目`;
+
+    stage.style.display = 'none';
+    slipArea.classList.add('show');
+    slipArea.scrollIntoView({ behavior:'smooth', block:'start' });
+    drawBtn.disabled = false;
+  }, 1550);
+});
+
+againBtn.addEventListener('click', ()=>{
+  slipArea.classList.remove('show');
+  stage.style.display = 'flex';
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+
+copyBtn.addEventListener('click', async ()=>{
+  const text = currentResultText();
+  try{
+    await navigator.clipboard.writeText(text);
+    showToast('結果をコピーしました');
+  }catch(e){
+    showToast('コピーに対応していない環境です');
+  }
+});
+</script>
+</body>
+</html>
